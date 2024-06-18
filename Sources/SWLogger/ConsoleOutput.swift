@@ -16,7 +16,7 @@
 
 import Foundation
 
-public class ConsoleOutput: LogOutput {
+public class ConsoleOutput: LogOutput, @unchecked Sendable {
     public init() {
         
     }

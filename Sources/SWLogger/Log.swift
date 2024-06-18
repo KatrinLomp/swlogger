@@ -17,32 +17,33 @@
 import Foundation
 
 public class Log {
-    public enum Level: Int {
+    public enum Level: Int, Sendable {
         case verbose = 0, debug, info, error, none
     }
 
-    public static var level = Level.none
     
     private static let base = Logging(name: "App")
     
-    public class func info<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+    public class func info<T: Sendable>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
         base.info(object, file: file, function: function, line: line)
     }
 
-    public class func debug<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+    public class func debug<T: Sendable>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
         base.debug(object, file: file, function: function, line: line)
     }
     
-    public class func error<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+    public class func error<T: Sendable>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
         base.error(object, file: file, function: function, line: line)
     }
 
-    public class func verbose<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+    public class func verbose<T: Sendable>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
         base.verbose(object, file: file, function: function, line: line)
     }
     
-    public class func add(output: LogOutput) {
-        Logger.sharedInstance.add(output: output)
+    public class func add(output: any LogOutput) {
+        Task {
+            await Logger.sharedInstance.add(output: output)
+        }
     }
     
     internal static let logger = Logging(name: "SWLogger")

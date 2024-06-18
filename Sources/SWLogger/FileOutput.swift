@@ -16,7 +16,7 @@
 
 import Foundation
 
-open class FileOutput: LogOutput {
+open class FileOutput: LogOutput, @unchecked Sendable {
     public enum Keep: Equatable {
         case forever
         case days(Int)
@@ -249,7 +249,7 @@ open class FileOutput: LogOutput {
     }
 }
 
-public struct LogFile {
+public struct LogFile: Sendable {
     public let name: String
     public let file: URL
     let creationDate: Date?

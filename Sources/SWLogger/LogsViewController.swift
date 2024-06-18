@@ -76,21 +76,23 @@ public class LogsViewController: UITableViewController {
 
 private extension LogsViewController {
     func listFiles() {
-        var files = [LogFile]()
-        for output in Logger.sharedInstance.outputs {
-            guard let fileOutput = output as? FileOutput else {
-                continue
+        Task {
+            var files = [LogFile]()
+            for output in  await Logger.sharedInstance.outputs {
+                guard let fileOutput = output as? FileOutput else {
+                    continue
+                }
+                
+                files.append(contentsOf: listFiles(for: fileOutput))
+            }
+            if let output = includeFilesFrom {
+                files.append(contentsOf: listFiles(for: output))
             }
             
-            files.append(contentsOf: listFiles(for: fileOutput))
+            self.files = files.sorted(by: { (left, right) -> Bool in
+                return left.name.compare(right.name) == .orderedDescending
+            })
         }
-        if let output = includeFilesFrom {
-            files.append(contentsOf: listFiles(for: output))
-        }
-
-        self.files = files.sorted(by: { (left, right) -> Bool in
-            return left.name.compare(right.name) == .orderedDescending
-        })
     }
     
     private func listFiles(for output: FileOutput) -> [LogFile] {

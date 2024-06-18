@@ -16,6 +16,6 @@
 
 import Foundation
 
-public protocol LogOutput {
+public protocol LogOutput: Sendable {
     func printMessage(_ message:String)
 }

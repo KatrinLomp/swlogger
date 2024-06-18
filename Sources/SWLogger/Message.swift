@@ -16,7 +16,7 @@
 
 import Foundation
 
-internal struct Message<T> {
+internal struct Message<T: Sendable>: Sendable {
     let object: T
     let logger: String
     let file: String

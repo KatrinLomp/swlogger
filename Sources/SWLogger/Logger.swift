@@ -16,30 +16,46 @@
 
 import Foundation
 
-internal class Logger {
-    internal static let sharedInstance = Logger()
-    internal var outputs = [LogOutput]()
+public actor Logger {
+    public static let sharedInstance = Logger()
+    internal var outputs = [any LogOutput]()
     private var cleaned = [String: String]()
         
     private let queue = DispatchQueue(label: "com.coodly.logging.queue")
     
-    internal func add(output: LogOutput) {
+//    public var level: Log.Level = .none
+
+    private(set) var level: Log.Level = .none
+    
+    public func setLevel(_ newLevel: Log.Level) {
+        level = newLevel
+    }
+    
+    public func getLevel() -> Log.Level {
+        return level
+    }
+    
+    internal func add(output: any LogOutput) {
         outputs.append(output)
     }
     
     internal func log<T>(message: Message<T>) {
-        queue.sync {
-            guard message.level.rawValue >= Log.level.rawValue else {
-                return
-            }
-
-            let time = timeFormatter.string(from: message.time)
-            let levelString = levelToString(message.level)
-            let cleanedFile = cleaned(path: message.file)
-            let message = "\(time) - \(message.logger) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
-
-            for output: LogOutput in outputs {
-                output.printMessage(message)
+        Task {
+            let level = await Logger.sharedInstance.getLevel()//Log.sharedInstance.level
+            
+            queue.sync {
+                guard message.level.rawValue >= level.rawValue else {
+                    return
+                }
+                
+                let time = timeFormatter.string(from: message.time)
+                let levelString = levelToString(message.level)
+                let cleanedFile = cleaned(path: message.file)
+                let message = "\(time) - \(message.logger) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
+                
+                for output: any LogOutput in outputs {
+                    output.printMessage(message)
+                }
             }
         }
     }

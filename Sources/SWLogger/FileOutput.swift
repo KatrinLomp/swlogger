@@ -120,12 +120,20 @@ open class FileOutput: LogOutput, @unchecked Sendable {
                 return
             }
             
-            if let data = message.data(using: .utf8) {
-                handle.write(data)
-            } else {
-                handle.write(noDataMessage)
+            defer {
+                handle.closeFile()
             }
-            handle.write(newLine)
+            
+            do {
+                if let data = message.data(using: .utf8) {
+                    try handle.write(contentsOf: data)
+                } else {
+                    try handle.write(contentsOf: noDataMessage)
+                }
+                try handle.write(contentsOf: newLine)
+            } catch {
+                print(error)
+            }
         }
     }
     
